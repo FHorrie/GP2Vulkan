@@ -1,0 +1,3 @@
+C:/Users/renzy/Bureaublad/DAE COURSES/Year 2/2ndSEM2/Graphics Programming 2/GP2Vulkan/out/build/x64-Debug/_deps/glfw-subbuild/CMakeFiles/glfw-populate.dir
+C:/Users/renzy/Bureaublad/DAE COURSES/Year 2/2ndSEM2/Graphics Programming 2/GP2Vulkan/out/build/x64-Debug/_deps/glfw-subbuild/CMakeFiles/edit_cache.dir
+C:/Users/renzy/Bureaublad/DAE COURSES/Year 2/2ndSEM2/Graphics Programming 2/GP2Vulkan/out/build/x64-Debug/_deps/glfw-subbuild/CMakeFiles/rebuild_cache.dir
