@@ -51,7 +51,7 @@ VkExtent2D VulkanBase::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabili
 	}
 	else {
 		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
+		glfwGetFramebufferSize(m_Window, &width, &height);
 
 		VkExtent2D actualExtent = {
 			static_cast<uint32_t>(width),
@@ -66,7 +66,7 @@ VkExtent2D VulkanBase::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabili
 }
 
 void VulkanBase::createSwapChain() {
-	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
+	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(VkUtils::physicalDevice);
 
 	VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
 	VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -88,7 +88,7 @@ void VulkanBase::createSwapChain() {
 	createInfo.imageArrayLayers = 1;
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-	vkUtils::QueueFamilyIndices indices = vkUtils::FindQueueFamilies(physicalDevice, m_Surface);
+	VkUtils::QueueFamilyIndices indices = VkUtils::FindQueueFamilies(VkUtils::physicalDevice, m_Surface);
 	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
 	if (indices.graphicsFamily != indices.presentFamily) {
@@ -138,8 +138,7 @@ void VulkanBase::createImageViews() {
 		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
 
-		if (vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS) {
+		if (vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
 			throw std::runtime_error("failed to create image views!");
-		}
 	}
 }

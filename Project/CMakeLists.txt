@@ -27,22 +27,22 @@ add_custom_target(
 set(SOURCES
     "main.cpp"
     "vulkanbase/VulkanBase.h" 
+    "vulkanbase/VulkanBase.cpp"
     "vulkanbase/VulkanUtil.h"
-    # Add other source files here
-    "labwork/Week01.cpp"
-    "labwork/Week02.cpp" 
+    
+     
     "labwork/Week03.cpp" 
     "labwork/Week04.cpp" 
     "labwork/Week05.cpp"
     "labwork/Week06.cpp"
-    "GP2Shader.h"
-    "GP2Shader.cpp"
-    "CommandPool.h"
-    "CommandPool.cpp"
-    "CommandBuffer.h"
-    "CommandBuffer.cpp"
-    "Vertex.h"
- "vulkanbase/VulkanBase.cpp" "GP2Mesh.h" "GP2Mesh.cpp")
+
+    "classes/GP2Shader.h"
+    "classes/GP2Shader.cpp"
+    "classes/CommandBuffer.h"
+    "classes/CommandBuffer.cpp"
+    "classes/GP2Mesh.h"
+    "classes/GP2Mesh.cpp"
+)
 
 # Create the executable
 add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES}  "vulkanbase/VulkanUtil.cpp" "labwork/Week03.cpp")

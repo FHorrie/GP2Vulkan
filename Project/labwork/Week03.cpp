@@ -1,6 +1,7 @@
 #include "vulkanbase/VulkanBase.h"
+#include "classes/GP2Shader.h"
 
-void VulkanBase::createFrameBuffers() {
+void VulkanBase::CreateFrameBuffers() {
 	swapChainFramebuffers.resize(swapChainImageViews.size());
 	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
 		VkImageView attachments[] = {
@@ -22,7 +23,7 @@ void VulkanBase::createFrameBuffers() {
 	}
 }
 
-void VulkanBase::createRenderPass() {
+void VulkanBase::CreateRenderPass() {
 	VkAttachmentDescription colorAttachment{};
 	colorAttachment.format = swapChainImageFormat;
 	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -54,7 +55,7 @@ void VulkanBase::createRenderPass() {
 	}
 }
 
-void VulkanBase::createGraphicsPipeline() {
+void VulkanBase::CreateGraphicsPipeline() {
 	VkPipelineViewportStateCreateInfo viewportState{};
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 	viewportState.viewportCount = 1;
@@ -111,10 +112,25 @@ void VulkanBase::createGraphicsPipeline() {
 	VkGraphicsPipelineCreateInfo pipelineInfo{};
 
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+
+	m_pShader = std::make_unique<GP2Shader>(device, "shaders/shader.vert.spv", "shaders/shader.frag.spv");
+
+	auto& vertShaderStageInfo = m_pShader->GetVertexInfo();
+	auto& fragShaderStageInfo = m_pShader->GetFragmentInfo();
+
+	VkPipelineShaderStageCreateInfo shaderStages[] = {
+		vertShaderStageInfo,
+		fragShaderStageInfo
+	};
+
+	auto vertexInputState{ m_pShader->CreateVertexInputStateInfo() };
+	auto inputAssemblyState{ m_pShader->CreateInputAssemblyStateInfo() };
+
+
 	pipelineInfo.stageCount = 2;
-	pipelineInfo.pStages = m_GradientShader.GetShaderStages().data();
-	pipelineInfo.pVertexInputState = &m_GradientShader.CreateVertexInputStateInfo();
-	pipelineInfo.pInputAssemblyState = &m_GradientShader.CreateInputAssemblyStateInfo();
+	pipelineInfo.pStages = shaderStages;
+	pipelineInfo.pVertexInputState = &vertexInputState;
+	pipelineInfo.pInputAssemblyState = &inputAssemblyState;
 
 #pragma region pipelineInfo
 	pipelineInfo.pViewportState = &viewportState;
@@ -128,9 +144,6 @@ void VulkanBase::createGraphicsPipeline() {
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 #pragma endregion
 
-	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
 		throw std::runtime_error("failed to create graphics pipeline!");
-	}
-
-	m_GradientShader.DestroyShaderModules(device);
 }

@@ -1,15 +1,15 @@
 #include "GP2Shader.h"
-#include "Vertex.h"
 #include "vulkanbase/VulkanUtil.h"
 
-void GP2Shader::Init(const VkDevice& vkDevice)
-{
-	m_ShaderStages.push_back(CreateVertexShaderInfo(vkDevice));
-	m_ShaderStages.push_back(CreateFragmentShaderInfo(vkDevice));
-}
+GP2Shader::GP2Shader(const VkDevice& vkDevice, const string& vertexShaderFile, const string& fragmentShaderFile)
+	: m_VertexShaderFile{ vertexShaderFile }
+	, m_FragmentShaderFile{ fragmentShaderFile }
+	, m_VertexInfo{ CreateVertexShaderInfo(vkDevice) }
+	, m_FragmentInfo{ CreateFragmentShaderInfo(vkDevice) }
+{}
 
 VkPipelineShaderStageCreateInfo GP2Shader::CreateFragmentShaderInfo(const VkDevice& vkDevice) {
-	std::vector<char> fragShaderCode = vkUtils::readFile(m_FragmentShaderFile);
+	std::vector<char> fragShaderCode = VkUtils::ReadFile(m_FragmentShaderFile);
 	VkShaderModule fragShaderModule = CreateShaderModule(vkDevice, fragShaderCode);
 
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
@@ -21,17 +21,8 @@ VkPipelineShaderStageCreateInfo GP2Shader::CreateFragmentShaderInfo(const VkDevi
 	return fragShaderStageInfo;
 }
 
-void GP2Shader::DestroyShaderModules(const VkDevice& vkDevice)
-{
-	for (auto& stageInfo : m_ShaderStages)
-	{
-		vkDestroyShaderModule(vkDevice, stageInfo.module, nullptr);
-	}
-	m_ShaderStages.clear();
-}
-
 VkPipelineShaderStageCreateInfo GP2Shader::CreateVertexShaderInfo(const VkDevice& vkDevice) {
-	std::vector<char> vertShaderCode = vkUtils::readFile(m_VertexShaderFile);
+	std::vector<char> vertShaderCode = VkUtils::ReadFile(m_VertexShaderFile);
 	VkShaderModule vertShaderModule = CreateShaderModule(vkDevice, vertShaderCode);
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
@@ -42,19 +33,23 @@ VkPipelineShaderStageCreateInfo GP2Shader::CreateVertexShaderInfo(const VkDevice
 	return vertShaderStageInfo;
 }
 
+GP2Shader::~GP2Shader()
+{
+	vkDestroyShaderModule(m_Device, m_VertexInfo.module, nullptr);
+	vkDestroyShaderModule(m_Device, m_FragmentInfo.module, nullptr);
+}
+
 VkPipelineVertexInputStateCreateInfo GP2Shader::CreateVertexInputStateInfo()
 {
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+	
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexBindingDescriptionCount = 0;
-	vertexInputInfo.vertexAttributeDescriptionCount = 0;
-
-	m_AttributeDescriptions = Vertex::getAttributeDescriptions();
-
+	
 	vertexInputInfo.vertexBindingDescriptionCount = 1;
-	vertexInputInfo.vertexAttributeDescriptionCount = int(m_AttributeDescriptions.size());
-	vertexInputInfo.pVertexBindingDescriptions = &m_BindingDescription;
-	vertexInputInfo.pVertexAttributeDescriptions = m_AttributeDescriptions.data();
+	vertexInputInfo.vertexAttributeDescriptionCount = int(GP2Mesh::Vertex::ATTRIBUTE_DESCS.size());
+
+	vertexInputInfo.pVertexBindingDescriptions = &GP2Mesh::Vertex::BINDING_DESC;
+	vertexInputInfo.pVertexAttributeDescriptions = GP2Mesh::Vertex::ATTRIBUTE_DESCS.data();
 
 	return vertexInputInfo;
 }

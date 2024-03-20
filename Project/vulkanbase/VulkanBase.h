@@ -6,9 +6,9 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include "VulkanUtil.h"
-#include "GP2Shader.h"
-#include "CommandBuffer.h"
-#include "CommandPool.h"
+#include "classes/GP2Shader.h"
+#include "classes/CommandBuffer.h"
+#include "classes/GP2Mesh.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -38,47 +38,31 @@ struct SwapChainSupportDetails {
 class VulkanBase 
 {
 public:
-	void run();
+	void Run();
 
 private:
-	void initVulkan();
-	void mainLoop();
-	void cleanup();
+	void InitVulkan();
+	void MainLoop();
+	void Cleanup();
 
-	void createSurface() {
-		if (glfwCreateWindowSurface(instance, window, nullptr, &m_Surface) != VK_SUCCESS) {
+	void CreateSurface() {
+		if (glfwCreateWindowSurface(instance, m_Window, nullptr, &m_Surface) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create window surface!");
 		}
 	}
 
-	GP2Shader m_GradientShader{"shaders/shader.vert.spv", "shaders/shader.frag.spv" };
+	GLFWwindow* m_Window;
+	void InitWindow();
 
-	// Week 01: 
-	// Actual window
-	// simple fragment + vertex shader creation functions
-	// These 5 functions should be refactored into a separate C++ class
-	// with the correct internal state.
+	void DrawScene();
+	void DrawFrame(uint32_t imageIndex);
+	void RecordCommandBuffer(uint32_t imageIndex);
 
-	const std::vector<Vertex> vertices
-	{
-		{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-		{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-		{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-	};
+	void CreateRenderPass();
+	void CreateGraphicsPipeline();
+	void CreateFrameBuffers();
 
-	GLFWwindow* window;
-	void initWindow();
-	void drawScene();
-
-	// Week 02
-	// Queue families
-	// CommandBuffer concept
-
-	std::unique_ptr<CommandPool> m_pCommandPool;
-	std::unique_ptr<CommandBuffer> m_pCommandBuffer;
-	VkBuffer vertexBuffer;
-
-	void createVertexBuffer()
+	void CreateVertexBuffer()
 	{
 		VkBufferCreateInfo bufferInfo{};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -89,9 +73,23 @@ private:
 		if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS)
 			throw std::runtime_error("failed to create vertex buffer!");
 	}
-	
-	void DrawFrame(uint32_t imageIndex);
-	void recordCommandBuffer(uint32_t imageIndex);
+
+	const std::vector<GP2Mesh::Vertex> vertices
+	{
+		{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+		{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+		{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+	};
+
+	std::unique_ptr<GP2Mesh> m_pMesh{};
+	std::unique_ptr<GP2Shader> m_pShader;
+
+	// Week 02
+	// Queue families
+	// CommandBuffer concept
+
+	std::unique_ptr<CommandBuffer> m_pCommandBuffer{};
+	VkBuffer vertexBuffer;
 	
 	// Week 03
 	// Renderpass concept
@@ -103,9 +101,6 @@ private:
 	VkRenderPass renderPass;
 
 
-	void createFrameBuffers();
-	void createRenderPass();
-	void createGraphicsPipeline();
 
 	// Week 04
 	// Swap chain and image view support
@@ -127,7 +122,6 @@ private:
 	// Week 05 
 	// Logical and physical device
 
-	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 	VkQueue graphicsQueue;
 	VkQueue presentQueue;
 	

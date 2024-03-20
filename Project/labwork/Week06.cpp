@@ -10,12 +10,13 @@ void VulkanBase::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInf
 
 
 void VulkanBase::setupDebugMessenger() {
-	if (!enableValidationLayers) return;
+	if (!VkUtils::VALIDATIONLAYERS) 
+		return;
 
 	VkDebugUtilsMessengerCreateInfoEXT createInfo;
 	populateDebugMessengerCreateInfo(createInfo);
 
-	if (vkUtils::CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
+	if (VkUtils::CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
 		throw std::runtime_error("failed to set up debug messenger!");
 	}
 }
@@ -44,7 +45,7 @@ void VulkanBase::DrawFrame() {
 	vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
 	vkResetCommandBuffer(m_pCommandBuffer->GetVkCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
-	recordCommandBuffer(imageIndex);
+	RecordCommandBuffer(imageIndex);
 
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -113,7 +114,7 @@ std::vector<const char*> VulkanBase::getRequiredExtensions() {
 
 	std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-	if (enableValidationLayers) {
+	if (VkUtils::VALIDATIONLAYERS) {
 		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	}
 
@@ -137,7 +138,7 @@ bool VulkanBase::checkDeviceExtensionSupport(VkPhysicalDevice device) {
 }
 
 void VulkanBase::createInstance() {
-	if (enableValidationLayers && !checkValidationLayerSupport()) {
+	if (VkUtils::VALIDATIONLAYERS && !checkValidationLayerSupport()) {
 		throw std::runtime_error("validation layers requested, but not available!");
 	}
 
@@ -158,20 +159,20 @@ void VulkanBase::createInstance() {
 	createInfo.ppEnabledExtensionNames = extensions.data();
 
 	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-	if (enableValidationLayers) {
+	if (VkUtils::VALIDATIONLAYERS) 
+	{
 		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 		createInfo.ppEnabledLayerNames = validationLayers.data();
 
 		populateDebugMessengerCreateInfo(debugCreateInfo);
 		createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
 	}
-	else {
+	else 
+	{
 		createInfo.enabledLayerCount = 0;
-
 		createInfo.pNext = nullptr;
 	}
 
-	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
 		throw std::runtime_error("failed to create instance!");
-	}
 }
